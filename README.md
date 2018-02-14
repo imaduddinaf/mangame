@@ -1,2 +1,2 @@
 # mangame
-a mangan app that user http://www.mangaeden.com/api/
+a manga app that uses http://www.mangaeden.com/api/
