@@ -1,4 +1,4 @@
-package com.imaduddinaf.mangame
+package com.imaduddinaf.mangame.utils
 
 import android.util.Log
 

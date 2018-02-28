@@ -1,46 +1,70 @@
 package com.imaduddinaf.mangame.activity
 
+import android.app.FragmentManager
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
-import com.imaduddinaf.mangame.Logger
+import com.imaduddinaf.mangame.utils.Logger
 import com.imaduddinaf.mangame.R
+import com.imaduddinaf.mangame.core.BaseActivity
+import com.imaduddinaf.mangame.core.BaseFragment
+import com.imaduddinaf.mangame.fragment.HomeFragment
 import com.imaduddinaf.mangame.network.APIManager
 import com.imaduddinaf.mangame.network.service.MangaService
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import org.androidannotations.annotations.EActivity
+import org.androidannotations.annotations.ViewById
 
-class MainActivity : AppCompatActivity() {
+@EActivity(R.layout.activity_main)
+class MainActivity : BaseActivity() {
 
-    var disposable: Disposable? = null
+    private var disposable: Disposable? = null
+    private var fragments: ArrayList<BaseFragment> = ArrayList()
+    private var currentFragment: BaseFragment = HomeFragment()
+    private var homeFragment: BaseFragment = HomeFragment()
 
-    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+    @ViewById(R.id.bottom_navigation)
+    private val navigationView: BottomNavigationView? = null
+
+    private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         request()
 
         when (item.itemId) {
             R.id.navigation_home -> {
-                message.setText(R.string.title_home)
+                if (currentFragment.javaClass == HomeFragment.javaClass) return@OnNavigationItemSelectedListener false
+
+                currentFragment = homeFragment
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_dashboard -> {
-                message.setText(R.string.title_dashboard)
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_notifications -> {
-                message.setText(R.string.title_notifications)
                 return@OnNavigationItemSelectedListener true
             }
         }
-        false
+
+
+        val transaction = fragmentManager?.beginTransaction()
+        transaction?.replace(R.id.content, currentFragment)?.commit()
+
+        true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        currentFragment = homeFragment
+
+        val transaction = fragmentManager?.beginTransaction()
+        transaction?.replace(R.id.content, currentFragment)?.commit()
+    }
+
+    override fun afterViews() {
+        navigationView?.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
     }
 
     private fun request() {
